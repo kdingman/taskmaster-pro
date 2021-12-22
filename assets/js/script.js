@@ -50,10 +50,17 @@ var saveTasks = function() {
 // audit tasks
 var auditTask = function(taskEl) {
   //get date from task element
-  var date = $(taskEl).find("span").text().trim();
+  var date = $(taskEl)
+    .find("span")
+    .text()
+    .trim();
+
+    console.log(date);
 
   // convert to moment object at 5:00pm
   var time = moment(date, "L").set("hour", 17);
+
+  console.log(time);
 
   // remove any old classes from element
   $(taskEl).removeClass("list-group-item-warning list-group-item-danger");
@@ -91,15 +98,15 @@ $(".card .list-group").sortable( {
     // loop over current set of children in sortable list
     $(this).children().each(function() {
       tempArr.push( {
-      text = $(this)
-        .find("p")
-        .text()
-        .trim(),
+      text: $(this)
+          .find("p")
+          .text()
+          .trim(),
 
-      date = $(this)
-        .find("span")
-        .text()
-        .trim(),
+      date: $(this)
+          .find("span")
+          .text()
+          .trim(),
     });
 });
     // trim down list's ID to match object property
@@ -110,6 +117,12 @@ $(".card .list-group").sortable( {
     // update array on tasks object and save
     task[arrName] = tempArr;
     saveTasks();
+  }
+  stop: function(event) {
+    $(this).removeClass("dropover");
+  }
+});
+
 // trash drop
 $("#trash").droppable( {
   accept: ".card .list-group-item",
@@ -175,7 +188,7 @@ $(".list-group").on("click", "p", function(){
     textInput.trigger("focus");
 });
 
-$("list-group").on("blur", "textarea", function() {
+$(".list-group").on("blur", "textarea", function() {
   // get the textarea's current value/text
   var text = $(this)
     .val()
@@ -258,11 +271,11 @@ $(".list-group").on("change", "input[type = 'text']", function() {
     .addClass("badge badge-primary badge-pill")
     .text(date);
 
-  // replace input with span element
-  $(this).replaceWith(taskSpan);
+    // replace input with span element
+    $(this).replaceWith(taskSpan);
 
-  // Pass task's <li> element into auditTask() to check new due date
-  auditTask($(taskSpan).closest(".list-group-item"));
+    // Pass task's <li> element into auditTask() to check new due date
+    auditTask($(taskSpan).closest(".list-group-item"));
 });
 
 // remove all tasks

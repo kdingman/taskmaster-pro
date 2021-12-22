@@ -50,10 +50,10 @@ $(".card .list-group").sortable( {
   scroll: false,
   tolerance: "pointer",
   helper: "clone",
-  activate: function(event) {
+  activate: function(event, ui) {
     console.log("activate", this);
   },
-  deactive: function(event) {
+  deactive: function(event, ui) {
     console.log("deactive", this);
   },
   over: function(event) {
@@ -62,28 +62,23 @@ $(".card .list-group").sortable( {
   out: function(event) {
     console.log("out", this);
   },
-  update: function(event) {
+  update: function(event, ui) {
     // array to store the task data in
     var tempArr = [];
     // loop over current set of children in sortable list
     $(this).children().each(function() {
-      var text = $(this)
+      tempArr.push( {
+      text = $(this)
         .find("p")
         .text()
-        .trim();
+        .trim(),
 
-      var date = $(this)
+      date = $(this)
         .find("span")
         .text()
-        .trim();
-
-      // add task data to the temp array as an object
-      tempArr.push( {
-        text: text,
-        date: date
-      });
+        .trim(),
+    });
 });
-
     // trim down list's ID to match object property
     var arrName = $(this)
       .attr("id")
@@ -92,21 +87,25 @@ $(".card .list-group").sortable( {
     // update array on tasks object and save
     task[arrName] = tempArr;
     saveTasks();
+// trash drop
+$("#trash").droppable( {
+  accept: ".card .list-group-item",
+  tolerance: "touch",
+    drop: function(event, ui) {
+      ui.draggable.remove();
+    },
+    over: function(event, ui) {
+      console.log("over");
+    },
+    out: function(event, ui) {
+      console.log("out");
+    }
+});
 
-    $("#trash").droppable( {
-      accept: ".card .list-group-item",
-      tolerance: "touch",
-      drop: function(event, ui) {
-        ui.draggable.remove();
-        console.log("drop");
-      },
-      over: function(event, ui) {
-        console.log("over");
-      },
-      out: function(event, ui) {
-        console.log("out");
-      }
-    });
+// date picker
+$("#modalDueDate").datepicker( {
+  minDate: 1
+});
 
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function() {
@@ -151,7 +150,6 @@ $(".list-group").on("click", "p", function(){
     .val(text);
     $(this).replaceWith(textInput);
     textInput.trigger("focus");
-  console.log(text);
 });
 
 $("list-group").on("blur", "textarea", function() {
@@ -172,6 +170,7 @@ $("list-group").on("blur", "textarea", function() {
     .index();
 
   tasks[status][index].text = text;
+  saveTasks();
 
 // recreate p element
   var taskP = $("<p>")
@@ -180,10 +179,7 @@ $("list-group").on("blur", "textarea", function() {
 
   // replace textarea with p element
   $(this).replaceWith(taskP);
-
-  saveTasks();
 });
-
 // due date was clicked
 $(".list-group").on("click", "span", function() {
   // get current text
@@ -205,7 +201,7 @@ $(".list-group").on("click", "span", function() {
 });
 
 // value of date was changed
-$(".list-group").on("blur", "input[type = 'text]", function() {
+$(".list-group").on("blur", "input[type = 'text']", function() {
   // get current text
   var date = $(this)
     .val()
